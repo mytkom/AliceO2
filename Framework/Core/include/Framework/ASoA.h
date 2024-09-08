@@ -2157,7 +2157,7 @@ typename C::type getSingleRowData(arrow::Table*, T& rowIterator, uint64_t ci = s
   if (globalIndex != std::numeric_limits<uint64_t>::max() && globalIndex != *std::get<0>(rowIterator.getIndices())) {
     rowIterator.setCursor(globalIndex);
   }
-  return rowIterator.template getDynamicColumn<C>();
+  return static_cast<C>(rowIterator).get();
 }
 
 template <typename T, soa::is_index_column C>
