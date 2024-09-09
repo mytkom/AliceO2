@@ -12,6 +12,7 @@
 #ifndef FRAMEWORK_BINNINGPOLICY_H
 #define FRAMEWORK_BINNINGPOLICY_H
 
+#include "Framework/ASoA.h"
 #include "Framework/HistogramSpec.h" // only for VARIABLE_WIDTH
 #include "Framework/Pack.h"
 
@@ -255,7 +256,7 @@ struct FlexibleBinningPolicy<std::tuple<Ls...>, Ts...> : BinningPolicyBase<sizeo
   }
 
   template <typename T>
-  auto getBinningValues(typename T::iterator rowIterator, uint64_t globalIndex = -1) const
+  auto getBinningValues(typename T::iterator rowIterator, T& table, uint64_t globalIndex = -1) const
   {
     return getBinningValues(rowIterator, globalIndex);
   }
@@ -310,7 +311,7 @@ struct NoBinningPolicy {
   }
 
   template <typename T>
-  auto getBinningValues(typename T::iterator rowIterator, uint64_t globalIndex = -1) const
+  auto getBinningValues(typename T::iterator rowIterator, T& table, uint64_t globalIndex = -1) const
   {
     return getBinningValues(rowIterator, globalIndex);
   }
