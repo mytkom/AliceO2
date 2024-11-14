@@ -2016,17 +2016,17 @@ concept persistent_with_common_getter = is_persistent_v<T> && requires(T t) {
 template <typename R, typename T, persistent_with_common_getter<R> C>
 ColumnGetterFunction<R, T> createGetterPtr(const std::string_view& columnLabel)
 {
-  return std::strncmp(columnLabel.data(), C::columnLabel(), columnLabel.size()) ? nullptr : &getColumnValue<R, T, C>;
+  return columnLabel == C::columnLabel() ? &getColumnValue<R, T, C> : nullptr;
 }
 
 template <typename R, typename T, dynamic_with_common_getter<R> C>
 ColumnGetterFunction<R, T> createGetterPtr(const std::string_view& columnLabel)
 {
   // allows user to use consistent formatting (with prefix) of all column labels
-  // by default there isn't 'f' prefix for dynamic column labels, strncmp(x,y,0) is always 0
-  bool isPrefixMatch = columnLabel.size() > 1 && !std::strncmp(columnLabel.substr(1).data(), C::columnLabel(), columnLabel.size() - 1);
+  // by default there isn't 'f' prefix for dynamic column labels
+  bool isPrefixMatch = columnLabel.size() > 1 && columnLabel.substr(1) == C::columnLabel();
   // check also exact match if user is aware of prefix missing
-  bool isExactMatch = !std::strncmp(columnLabel.data(), C::columnLabel(), columnLabel.size());
+  bool isExactMatch = columnLabel == C::columnLabel();
 
   return (isPrefixMatch || isExactMatch) ? &getColumnValue<R, T, C> : nullptr;
 }
