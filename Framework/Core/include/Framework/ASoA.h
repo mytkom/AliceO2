@@ -2016,25 +2016,19 @@ concept persistent_with_common_getter = is_persistent_v<T> && requires(T t) {
 template <typename R, typename T, persistent_with_common_getter<R> C>
 ColumnGetterFunction<R, T> createGetterPtr(const std::string_view& columnLabel)
 {
-  const size_t n = columnLabel.size();
-
-  if (n == 0 || n != strlen(C::columnLabel())) {
-    return nullptr;
-  }
-
-  return (std::strcmp(columnLabel.data(), C::columnLabel())) ? nullptr : &getColumnValue<R, T, C>;
+  return std::strncmp(columnLabel.data(), C::columnLabel(), columnLabel.size()) ? nullptr : &getColumnValue<R, T, C>;
 }
 
 template <typename R, typename T, dynamic_with_common_getter<R> C>
 ColumnGetterFunction<R, T> createGetterPtr(const std::string_view& columnLabel)
 {
-  const size_t n = columnLabel.size();
+  // allows user to use consistent formatting (with prefix) of all column labels
+  // by default there isn't 'f' prefix for dynamic column labels, strncmp(x,y,0) is always 0
+  bool isPrefixMatch = columnLabel.size() > 1 && !std::strncmp(columnLabel.substr(1).data(), C::columnLabel(), columnLabel.size() - 1);
+  // check also exact match if user is aware of prefix missing
+  bool isExactMatch = !std::strncmp(columnLabel.data(), C::columnLabel(), columnLabel.size());
 
-  if (n == 0 || (n != strlen(C::columnLabel()) && n - 1 != strlen(C::columnLabel()))) {
-    return nullptr;
-  }
-
-  return ((std::strcmp(&columnLabel[1], C::columnLabel()) && std::strcmp(columnLabel.data(), C::columnLabel()))) ? nullptr : &getColumnValue<R, T, C>;
+  return (isPrefixMatch || isExactMatch) ? &getColumnValue<R, T, C> : nullptr;
 }
 
 template <typename R, typename T, typename... Cs>
@@ -2045,7 +2039,7 @@ ColumnGetterFunction<R, T> getColumnGetterByLabel(o2::framework::pack<Cs...>, co
   (void)((func = createGetterPtr<R, T, Cs>(columnLabel), func) || ...);
 
   if (!func) {
-    throw framework::runtime_error("Getter for provided columnLabel not found!");
+    throw framework::runtime_error_f("Getter for \"%s\" not found", columnLabel);
   }
 
   return func;
@@ -2058,6 +2052,10 @@ template <typename R, typename T>
 ColumnGetterFunction<R, typename T::iterator> getColumnGetterByLabel(const std::string_view& columnLabel)
 {
   using TypesWithCommonGetter = o2::framework::selected_pack_multicondition<with_common_getter_t, framework::pack<R>, typename T::columns>;
+
+  if (columnLabel.size() == 0) {
+    throw framework::runtime_error("columnLabel: must not be empty");
+  }
 
   return getColumnGetterByLabel<R, typename T::iterator>(TypesWithCommonGetter{}, columnLabel);
 }
