@@ -2024,12 +2024,12 @@ ColumnGetterFunction<R, T> createGetterPtr(const std::string_view& columnLabel)
 {
   // allows user to use consistent formatting (with prefix) of all column labels
   // by default there isn't 'f' prefix for dynamic column labels
-  if(columnLabel.size() > 1 && columnLabel.substr(1) == C::columnLabel()) {
+  if (columnLabel.size() > 1 && columnLabel.substr(1) == C::columnLabel()) {
     return &getColumnValue<R, T, C>;
   }
 
   // check also exact match if user is aware of prefix missing
-  if(columnLabel == C::columnLabel()) {
+  if (columnLabel == C::columnLabel()) {
     return &getColumnValue<R, T, C>;
   }
 
