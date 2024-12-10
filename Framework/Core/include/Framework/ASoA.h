@@ -1215,7 +1215,7 @@ struct TableIterator : IP, C... {
   {
     static_assert(std::same_as<decltype(&(static_cast<B*>(this)->mColumnIterator)), std::decay_t<decltype(B::mColumnIterator)>*>, "foo");
     return &(static_cast<B*>(this)->mColumnIterator);
-    //return static_cast<std::decay_t<decltype(B::mColumnIterator)>*>(nullptr);
+    // return static_cast<std::decay_t<decltype(B::mColumnIterator)>*>(nullptr);
   }
 
   template <typename B>
